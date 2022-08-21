@@ -7,7 +7,12 @@ public class CitizenOpenVariables : MonoBehaviour
     public Animator CitizenAnimator;
     public Rigidbody CitizenRB;
 
-    [SerializeField] public GameObject[] CitizenWaypoints;
+    [SerializeField] public Transform MeetingPlace;
+
+    [SerializeField] public float CitizenRotationSpeed = 5f;
+    [SerializeField] public float CitizenSpeed = 10f;
+
+    [SerializeField] public GameObject[] CitizenWorkAreas;
     private void Awake()
     {
         CitizenTransform = GetComponent<Transform>();

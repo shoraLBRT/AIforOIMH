@@ -64,11 +64,14 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets\Scripts\AbstractNPC.cs" />
-    <Compile Include="Assets\Scripts\CitizenIdleState.cs" />
-    <Compile Include="Assets\Scripts\CitizenMeetingState.cs" />
-    <Compile Include="Assets\Scripts\CitizenNPC.cs" />
-    <Compile Include="Assets\Scripts\CitizenOpenVariables.cs" />
+    <Compile Include="Assets\Scripts\AIManager.cs" />
+    <Compile Include="Assets\Scripts\Citizen\CitizenAnimations.cs" />
+    <Compile Include="Assets\Scripts\Citizen\CitizenIdleState.cs" />
+    <Compile Include="Assets\Scripts\Citizen\CitizenMeetingState.cs" />
+    <Compile Include="Assets\Scripts\Citizen\CitizenNPC.cs" />
+    <Compile Include="Assets\Scripts\Citizen\CitizenOpenVariables.cs" />
+    <Compile Include="Assets\Scripts\Citizen\CitizenStateController.cs" />
+    <Compile Include="Assets\Scripts\INPCStates.cs" />
     <Compile Include="Assets\Scripts\InGameTime.cs" />
     <Compile Include="Assets\Scripts\Locator.cs" />
     <Reference Include="UnityEngine">

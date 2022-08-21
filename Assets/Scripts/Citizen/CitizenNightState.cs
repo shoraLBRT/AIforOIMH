@@ -2,17 +2,16 @@
 using System.Threading.Tasks;
 using UnityEngine;
 
-public class CitizenMeetingState : ICitizenState
+public class CitizenNightState : ICitizenState
 {
-    private Transform _meetingPlace;
+    private Transform _house;
     private Transform _citizenTransform;
 
     private float _citizenSpeed;
     private float _rotSpeed;
     private float _minRange = 3f;
 
-    private bool _citizenOnMeeting = false;
-
+    private bool _citizenOnBed = false;
     public async void Enter(GameObject concreteCitizen, GameObject[] citizenWayPoits)
     {
         _citizenTransform = concreteCitizen.transform;
@@ -21,41 +20,34 @@ public class CitizenMeetingState : ICitizenState
     }
     private async Task GetGlobalVariables()
     {
-        _meetingPlace = Locator.GetObject<CitizenOpenVariables>().MeetingPlace;
+        _house = Locator.GetObject<CitizenOpenVariables>().House;
         _rotSpeed = Locator.GetObject<CitizenOpenVariables>().CitizenRotationSpeed;
         _citizenSpeed = Locator.GetObject<CitizenOpenVariables>().CitizenSpeed;
         await Task.Delay(50);
     }
     public void CitizenUpdate()
     {
-        if (!_citizenOnMeeting)
-            GoingToTheMeeting();
-        else DoTheMeeting();
+        if (!_citizenOnBed)
+            GoToSleep();
     }
-    public void Exit()
+    private void GoToSleep()
     {
-        _citizenOnMeeting = false;
-    }
-    private void DoTheMeeting()
-    {
-        if (Vector3.Distance(_citizenTransform.position, _meetingPlace.position) > _minRange)
+        if (Vector3.Distance(_citizenTransform.position, _house.position) < _minRange)
         {
-            _citizenOnMeeting = false;
+            _citizenOnBed = true;
+            Debug.Log("Citizen Sleeping");
         }
-    }
-    private void GoingToTheMeeting()
-    {
-        if (Vector3.Distance(_citizenTransform.position, _meetingPlace.position) < _minRange)
-        {
-            _citizenOnMeeting = true;
-            Debug.Log("Citizen on meeting");
-        }
-        else _citizenOnMeeting = false;
+        else _citizenOnBed = false;
 
-        Quaternion lookatWP = Quaternion.LookRotation(_meetingPlace.position - _citizenTransform.position);
+        Quaternion lookatWP = Quaternion.LookRotation(_house.position - _citizenTransform.position);
 
         _citizenTransform.rotation = Quaternion.Slerp(_citizenTransform.rotation, lookatWP, _rotSpeed * Time.deltaTime);
 
         _citizenTransform.Translate(0, 0, _citizenSpeed * Time.deltaTime);
+    }
+
+    public void Exit()
+    {
+        _citizenOnBed = false;
     }
 }

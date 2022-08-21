@@ -6,6 +6,8 @@ using UnityEngine;
 
 public class CitizenIdleState : ICitizenState
 {
+    private AIManager _aiManager;
+
     private Transform _citizenTransform;
     private GameObject[] _waypoints;
 
@@ -30,10 +32,21 @@ public class CitizenIdleState : ICitizenState
     {
         _citizenTransform = concreteCitizen.transform;
         GetGlobalVariables();
+
         _waypoints = citizenWayPoints;
+
         await InitIdleStates();
         SetRandomState();
-        Debug.Log("Enter into Citizen idle state");
+        _aiManager = Locator.GetObject<AIManager>();
+        _aiManager.CitizenRoaming += delegate()
+        {
+            SetCurrentIdleState(_states.roaming);
+        };
+        _aiManager.CitizenWorking += delegate ()
+        {
+            SetCurrentIdleState(_states.working);
+        };
+
     }
     private void GetGlobalVariables()
     {

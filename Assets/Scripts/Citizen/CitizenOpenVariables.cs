@@ -7,6 +7,7 @@ public class CitizenOpenVariables : MonoBehaviour
     public Animator CitizenAnimator;
     public Rigidbody CitizenRB;
 
+    [SerializeField] public Transform House;
     [SerializeField] public Transform MeetingPlace;
 
     [SerializeField] public float CitizenRotationSpeed = 5f;

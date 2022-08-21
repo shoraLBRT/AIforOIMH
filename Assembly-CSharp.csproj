@@ -69,6 +69,7 @@
     <Compile Include="Assets\Scripts\Citizen\CitizenIdleState.cs" />
     <Compile Include="Assets\Scripts\Citizen\CitizenMeetingState.cs" />
     <Compile Include="Assets\Scripts\Citizen\CitizenNPC.cs" />
+    <Compile Include="Assets\Scripts\Citizen\CitizenNightState.cs" />
     <Compile Include="Assets\Scripts\Citizen\CitizenOpenVariables.cs" />
     <Compile Include="Assets\Scripts\Citizen\CitizenStateController.cs" />
     <Compile Include="Assets\Scripts\INPCStates.cs" />

@@ -5,6 +5,7 @@ using UnityEngine;
 
 public class CitizenStateController : MonoBehaviour, INPCStates
 {
+    private AIManager _aiManager;
     private Dictionary<Type, ICitizenState> _statesGroup;
     private ICitizenState _currentState;
 
@@ -12,11 +13,19 @@ public class CitizenStateController : MonoBehaviour, INPCStates
 
     [SerializeField] private GameObject[] _citizenWaypoints;
 
+
     private void Awake()
     {
         Locator.Register<CitizenStateController>(this);
         InitStates();
         _concreteCitizen = gameObject;
+    }
+    private void Start()
+    {
+        _aiManager = Locator.GetObject<AIManager>();
+        _aiManager.GoToMeeting += SetMeetingState;
+        _aiManager.GoToTheBed += SetNightState;
+        _aiManager.CitizenIdle += SetIdleState;
     }
     private void Update()
     {
@@ -29,14 +38,14 @@ public class CitizenStateController : MonoBehaviour, INPCStates
     {
         if (Input.GetKeyDown(KeyCode.W))
             SetIdleState();
-        if (Input.GetKeyDown(KeyCode.A))
-            SetMeetingState();
+
     }
     private void InitStates()
     {
         _statesGroup = new Dictionary<Type, ICitizenState>();
         _statesGroup[typeof(CitizenIdleState)] = new CitizenIdleState();
         _statesGroup[typeof(CitizenMeetingState)] = new CitizenMeetingState();
+        _statesGroup[typeof(CitizenNightState)] = new CitizenNightState();
     }
     private void SetState(ICitizenState newState)
     {
@@ -73,6 +82,8 @@ public class CitizenStateController : MonoBehaviour, INPCStates
 
     public void SetNightState()
     {
-        throw new NotImplementedException();
+        Debug.Log("Citizen Night State");
+        ICitizenState state = GetState<CitizenNightState>();
+        SetState(state);
     }
 }

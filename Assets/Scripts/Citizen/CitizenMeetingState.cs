@@ -13,7 +13,7 @@ public class CitizenMeetingState : ICitizenState
 
     private bool _citizenOnMeeting = false;
 
-    public async void Enter(GameObject concreteCitizen, GameObject[] citizenWayPoits)
+    public async void EnterAsync(GameObject concreteCitizen, GameObject[] citizenWayPoits)
     {
         _citizenTransform = concreteCitizen.transform;
         Debug.Log("Meeting started");
@@ -48,7 +48,6 @@ public class CitizenMeetingState : ICitizenState
         if (Vector3.Distance(_citizenTransform.position, _meetingPlace.position) < _minRange)
         {
             _citizenOnMeeting = true;
-            Debug.Log("Citizen on meeting");
         }
         else _citizenOnMeeting = false;
 

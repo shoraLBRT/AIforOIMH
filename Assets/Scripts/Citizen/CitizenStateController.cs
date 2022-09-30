@@ -5,6 +5,8 @@ using UnityEngine;
 
 public class CitizenStateController : MonoBehaviour, INPCStates
 {
+    public GameObject TheWriter;
+
     private AIManager _aiManager;
     private Dictionary<Type, ICitizenState> _statesGroup;
     private ICitizenState _currentState;
@@ -22,10 +24,12 @@ public class CitizenStateController : MonoBehaviour, INPCStates
     }
     private void Start()
     {
+        SetIdleState();
         _aiManager = Locator.GetObject<AIManager>();
         _aiManager.GoToMeeting += SetMeetingState;
         _aiManager.GoToTheBed += SetNightState;
         _aiManager.CitizenIdle += SetIdleState;
+        _aiManager.CitizenAgr += SetAgressiveState;
     }
     private void Update()
     {
@@ -46,6 +50,7 @@ public class CitizenStateController : MonoBehaviour, INPCStates
         _statesGroup[typeof(CitizenIdleState)] = new CitizenIdleState();
         _statesGroup[typeof(CitizenMeetingState)] = new CitizenMeetingState();
         _statesGroup[typeof(CitizenNightState)] = new CitizenNightState();
+        _statesGroup[typeof(CitizenAgressiveState)] = new CitizenAgressiveState();
     }
     private void SetState(ICitizenState newState)
     {
@@ -54,7 +59,7 @@ public class CitizenStateController : MonoBehaviour, INPCStates
             _currentState.Exit();
         }
         _currentState = newState;
-        _currentState.Enter(_concreteCitizen, _citizenWaypoints);
+        _currentState.EnterAsync(_concreteCitizen, _citizenWaypoints);
     }
     private ICitizenState GetState<T>() where T : ICitizenState
     {
@@ -64,25 +69,23 @@ public class CitizenStateController : MonoBehaviour, INPCStates
 
     public void SetIdleState()
     {
-        Debug.Log("Citizen Idle State");
         ICitizenState state = GetState<CitizenIdleState>();
         SetState(state);
     }
 
     public void SetMeetingState()
     {
-        Debug.Log("Citizen Meeting State");
         ICitizenState state = GetState<CitizenMeetingState>();
         SetState(state);
     }
     public void SetAgressiveState()
     {
-        throw new NotImplementedException();
+        ICitizenState state = GetState<CitizenAgressiveState>();
+        SetState(state);
     }
 
     public void SetNightState()
     {
-        Debug.Log("Citizen Night State");
         ICitizenState state = GetState<CitizenNightState>();
         SetState(state);
     }

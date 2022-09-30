@@ -4,57 +4,56 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
 
-public class CitizenIdleState : ICitizenState
+public class GuardianIdleState : IGuardianState
 {
     private AIManager _aiManager;
 
-    private Transform _citizenTransform;
+    private Transform _guardianTransform;
     private GameObject[] _waypoints;
 
-    private GameObject[] _workAreas;
+    private Transform[] _securityAreas;
     private int _currentWA = 0;
 
-    private float _workTime = 2f;
+    private float _holdTime = 2f;
 
     private int _currentWP = 0;
 
-    private float _citizenSpeed;
-    private float _rotSpeed;
+    private float _guardianSpeed = 8f;
+    private float _rotSpeed = 5f;
 
     private readonly Dictionary<_states, Action> IdleStates = new Dictionary<_states, Action>();
-    public enum _states { stay, roaming, working };
+    public enum _states { stay, roaming, holding };
     public _states _currentIdleState = _states.stay;
 
     private int randomInt = UnityEngine.Random.Range(0, 2);
 
     #region Idle States Settings
-    public async void EnterAsync(GameObject concreteCitizen, GameObject[] citizenWayPoints)
+    public async void EnterAsync(GameObject concreteGuardian, GameObject[] guardianWayPoints)
     {
-        _citizenTransform = concreteCitizen.transform;
+        _guardianTransform = concreteGuardian.transform;
         GetGlobalVariables();
 
-        _waypoints = citizenWayPoints;
+        _waypoints = guardianWayPoints;
 
         await InitIdleStates();
         SetRandomState();
         _aiManager = Locator.GetObject<AIManager>();
-        _aiManager.CitizenRoaming += delegate()
+        _aiManager.GuardianRoaming += delegate()
         {
             SetCurrentIdleState(_states.roaming);
         };
-        _aiManager.CitizenWorking += delegate ()
+        _aiManager.GuardianHolding += delegate ()
         {
-            SetCurrentIdleState(_states.working);
+            SetCurrentIdleState(_states.holding);
         };
 
     }
     private void GetGlobalVariables()
     {
-        _workAreas = Locator.GetObject<CitizenOpenVariables>().CitizenWorkAreas;
-        _rotSpeed = Locator.GetObject<CitizenOpenVariables>().CitizenRotationSpeed;
-        _citizenSpeed = Locator.GetObject<CitizenOpenVariables>().CitizenSpeed;
+        _securityAreas = Locator.GetObject<OpenVariables>().SecurityZones;
+
     }
-    public void CitizenUpdate()
+    public void GuardianUpdate()
     {
         UpdateCurrentState(_currentIdleState);
     }
@@ -66,8 +65,9 @@ public class CitizenIdleState : ICitizenState
     public async Task InitIdleStates()
     {   
         IdleStates.Add(_states.roaming, RoamingToWP);
-        IdleStates.Add(_states.working, Working);
+        IdleStates.Add(_states.holding, Holding);
         IdleStates.Add(_states.stay, Stay);
+        Debug.Log("Inited");
         await Task.Delay(100);
     }
     public void SetRandomState()
@@ -81,7 +81,7 @@ public class CitizenIdleState : ICitizenState
                 SetCurrentIdleState(_states.roaming);
                 break;
             case 2:
-                SetCurrentIdleState(_states.working);
+                SetCurrentIdleState(_states.holding);
                 break;
             default:
                 SetCurrentIdleState(_states.stay);
@@ -92,6 +92,7 @@ public class CitizenIdleState : ICitizenState
     {
         _currentIdleState = _states.stay;
         _currentIdleState = state;
+        Console.WriteLine("setted state" + state);
     }
     public void UpdateCurrentState(_states state)
     {
@@ -104,7 +105,7 @@ public class CitizenIdleState : ICitizenState
     {
         var minRange = 5f;
 
-        if (Vector3.Distance(_citizenTransform.position, _waypoints[_currentWP].transform.position) < minRange)
+        if (Vector3.Distance(_guardianTransform.position, _waypoints[_currentWP].transform.position) < minRange)
         {
             _currentWP++;
         }
@@ -112,51 +113,45 @@ public class CitizenIdleState : ICitizenState
         if (_currentWP >= _waypoints.Length)
             _currentWP = 0;
 
-        Quaternion lookatWP = Quaternion.LookRotation(_waypoints[_currentWP].transform.position - _citizenTransform.position);
+        Quaternion lookatWP = Quaternion.LookRotation(_waypoints[_currentWP].transform.position - _guardianTransform.position);
 
-        _citizenTransform.rotation = Quaternion.Slerp(_citizenTransform.rotation, lookatWP, _rotSpeed * Time.deltaTime);
+        _guardianTransform.rotation = Quaternion.Slerp(_guardianTransform.rotation, lookatWP, _rotSpeed * Time.deltaTime);
 
-        _citizenTransform.Translate(0, 0, _citizenSpeed * Time.deltaTime);
+        _guardianTransform.Translate(0, 0, _guardianSpeed * Time.deltaTime);
     }
-    #region CitizenWorking
-    private void Working()
+    private void Holding()
     {
         var minRange = 8f;
 
-
-        if (Vector3.Distance(_citizenTransform.position, _workAreas[_currentWA].transform.position) < minRange)
+        if (Vector3.Distance(_guardianTransform.position, _securityAreas[_currentWA].transform.position) < minRange)
         {
             QuestTimer();
         }
 
-        Quaternion lookatWP = Quaternion.LookRotation(_workAreas[_currentWA].transform.position - _citizenTransform.position);
-        _citizenTransform.rotation = Quaternion.Slerp(_citizenTransform.rotation, lookatWP, _rotSpeed * Time.deltaTime);
+        Quaternion lookatWP = Quaternion.LookRotation(_securityAreas[_currentWA].transform.position - _guardianTransform.position);
+        _guardianTransform.rotation = Quaternion.Slerp(_guardianTransform.rotation, lookatWP, _rotSpeed * Time.deltaTime);
 
-        _citizenTransform.Translate(0, 0, _citizenSpeed * Time.deltaTime);
+        _guardianTransform.Translate(0, 0, _guardianSpeed * Time.deltaTime);
     }
     private void QuestTimer()
     {
-        if (_workTime > 0)
+        if (_holdTime > 0)
         {
-            _workTime -= Time.deltaTime * 100f;
+            _holdTime -= Time.deltaTime * 100f;
+            _guardianSpeed = 1f;
         }
 
-        if (_workTime <= 0f)
+        if (_holdTime <= 0f)
         {
-            _currentWA = UnityEngine.Random.Range(0, _workAreas.Length);
-            _workTime = 2f;
-            if (_currentWA >= _workAreas.Length)
+            _guardianSpeed = 5f;
+            _currentWA = UnityEngine.Random.Range(0, _securityAreas.Length);
+            _holdTime = 5f;
+            if (_currentWA >= _securityAreas.Length)
             {
                 _currentWA = 0;
             }
 
         }
-    }
-    #endregion
-
-    private void Talking()
-    {
-
     }
 
     private void Stay()

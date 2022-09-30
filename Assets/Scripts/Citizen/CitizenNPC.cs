@@ -5,7 +5,7 @@ public interface ICitizenState
 {
     void CitizenUpdate();
     void Exit();
-    void Enter(GameObject concreteCitizen, GameObject[] citizenWayPoits);
+    void EnterAsync(GameObject concreteCitizen, GameObject[] citizenWayPoits);
 }
 public class CitizenNPC : MonoBehaviour
 {
